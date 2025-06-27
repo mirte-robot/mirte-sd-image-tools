@@ -83,8 +83,9 @@ jobs:
               run: |
                     sudo apt update
                     sudo apt install qemu-user-static parted -y
-                    PACKER_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
                     ./packerInstall.sh
+              env:
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: setup build files
               run: |
                   if [[ "${{ inputs.branch }}" == "develop" ]]; then
@@ -106,6 +107,8 @@ jobs:
               run: |
                     cat repos.yaml
                     ./packerBuild.sh ${{ inputs.sbc }}
+              env:
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: artifacts
               uses: actions/upload-artifact@v4
               if: always()
