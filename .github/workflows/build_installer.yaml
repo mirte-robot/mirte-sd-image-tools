@@ -67,7 +67,6 @@ jobs:
               run: |
                     sudo apt update
                     sudo apt install qemu-user-static parted -y
-                    PACKER_GITHUB_API_TOKEN=${{ secrets.GITHUB_TOKEN }}
                     ./packerInstall.sh
                     ls
                     # tree
@@ -89,6 +88,9 @@ jobs:
                     df -h
                     ./scripts/finalize.sh $(realpath "./workdir/mirte_orangepi3b_installer.img") # finalize installer
                     df -h
+              env:
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: artifacts
               uses: actions/upload-artifact@v4
               if: ${{ inputs.mirte_type == 'mirte-master'  }}
