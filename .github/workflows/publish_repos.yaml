@@ -1,32 +1,15 @@
 name: Publish other repos
 
 on:
-    release:
-        types: [published]
-    push:
+  push:
+  release:
+    types: [published]
+
+
 permissions:
     contents: write
 
 jobs:
-    # create matrix for all repos from the default_repos.yaml file
-    create-matrix:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout default_repos.yaml
-              uses: actions/checkout@v5
-              with:
-                  ref: main
-            - name: Create matrix
-              id: gen-matrix
-              run: |
-                echo "matrix=$(yq eval '.repositories | keys' default_repos.yaml -o json)" >> $GITHUB_ENV
-                delimiter="SMEERKAAS"
-                echo "services<<$delimiter
-                $SERVICES_JSON
-                $delimiter" >> "$GITHUB_OUTPUT"
-        outputs:
-            services: ${{ steps.gen-matrix.outputs.services }}
-
     upload-repos:
         # container:
         #   image: ubuntu:22.04
@@ -36,26 +19,28 @@ jobs:
 
 
         runs-on: ubuntu-latest
-        needs: create-matrix
-        strategy:
-            matrix:
-                repo:
-                    ${{ fromJson(needs.create-matrix.outputs.services) }}
-            fail-fast: false
         steps:
             - name: Checkout repository
               uses: actions/checkout@v5
-              with:
-                  ref: main
-            - name: find branch to build
-              id: find_branch
+            - name: upload repos
               run: |
-                  echo "BRANCH=$(yq eval ".repositories.${{ matrix.repo }}.version" default_repos.yaml)" >> $GITHUB_ENV
-            - run: |
-                  git clone https://github.com/mirte-robot/${{ matrix.repo }}.git --branch $BRANCH
-                  zip -r ${{ matrix.repo }}.zip ${{ matrix.repo }}
+                # for every repo in default_repos.yaml create a zip file and upload it to the release
+
+                # get the list of packages from repos.yaml
+                packages=$(yq e '.repositories[].url' "$repos_file")
+                branches=$(yq e '.repositories[].version' "$repos_file")
+
+                i=1
+                for package in $packages; do
+                    branch=$(echo "$branches" | sed -n "${i}p")
+                    i=$((i + 1))
+                    echo "Processing $package on branch $branch"
+                    git clone "$package" --branch "$branch"
+                    repo_name=$(basename "$package" .git)
+                    zip -r "$repo_name".zip "$repo_name"
+                done
             - name: Push to release
               uses: softprops/action-gh-release@v2
               if: startsWith(github.ref, 'refs/tags/')
               with:
-                  files: ${{ matrix.repo }}.zip
+                  files: *.zip
