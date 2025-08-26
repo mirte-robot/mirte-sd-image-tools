@@ -51,6 +51,8 @@ jobs:
                 # if dir is empty, use "latest"
                 if [ -z "$dir" ]; then
                   dir="latest"
+                  # delete the latest folder if it exists
+                  curl -X DELETE -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/$dir/" || true
                 fi
                 curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/$dir/" || true
                 curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/$dir/"
