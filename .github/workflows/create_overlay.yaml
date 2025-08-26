@@ -37,8 +37,16 @@ jobs:
               with:
                 path: build/*.img.xz
                 name: overlay_image
-            - name: Push to release
-              uses: softprops/action-gh-release@v2
+            # - name: Push to release
+            #   uses: softprops/action-gh-release@v2
+            #   if: startsWith(github.ref, 'refs/tags/')
+            #   with:
+            #       files: build/*.img.xz
+            - name: Upload to surfdrive with curl if release
               if: startsWith(github.ref, 'refs/tags/')
-              with:
-                  files: build/*.img.xz
+              run: |
+                // create folder with tag name, ignore error if exists
+                curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/${{ github.event.release.tag_name }}/" || true
+
+                curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/${{ github.event.release.tag_name }}/"
+
