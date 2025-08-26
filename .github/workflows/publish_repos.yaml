@@ -1,7 +1,6 @@
 name: Publish other repos
 
 on:
-  push:
   release:
     types: [published]
 
