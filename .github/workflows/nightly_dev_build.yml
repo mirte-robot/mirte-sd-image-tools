@@ -4,6 +4,8 @@ on:
     schedule:
       - cron: '0 0 * * *' # Scheduled workflows will only run on main branch
     workflow_dispatch:
+    release:
+        types: [published]
 
 permissions:
     contents: write
