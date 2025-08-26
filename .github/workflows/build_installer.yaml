@@ -83,8 +83,8 @@ jobs:
                     df -h
                     sudo rm -rf /root/.cache/packer
                     df -h
-                    rm -f build/${{ matrix.image }}.img
-                    rm -f build/${{ matrix.image }}.img.xz
+                    rm -f build/*.img
+                    rm -f build/*.img.xz
                     rm -f workdir/mirte_orangepi3b.img
                     df -h
                     ./scripts/finalize.sh $(realpath "./workdir/mirte_orangepi3b_installer.img") ${{ inputs.mirte_type }} # finalize installer
