@@ -18,11 +18,11 @@ jobs:
             - name: Create matrix
               id: gen-matrix
               run: |
-                  echo "matrix=$(yq eval '.repositories | keys' default_repos.yaml -o json)" >> $GITHUB_ENV
-                  delimiter="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 20)"
-                    echo "services<<$delimiter
-                    $SERVICES_JSON
-                    $delimiter" >> "$GITHUB_OUTPUT"
+                echo "matrix=$(yq eval '.repositories | keys' default_repos.yaml -o json)" >> $GITHUB_ENV
+                delimiter="SMEERKAAS"
+                echo "services<<$delimiter
+                $SERVICES_JSON
+                $delimiter" >> "$GITHUB_OUTPUT"
         outputs:
             services: ${{ steps.gen-matrix.outputs.services }}
 
