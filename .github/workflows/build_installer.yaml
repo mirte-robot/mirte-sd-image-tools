@@ -86,7 +86,7 @@ jobs:
                     rm -f build/${{ matrix.image }}.img
                     rm -f workdir/mirte_orangepi3b.img
                     df -h
-                    ./scripts/finalize.sh $(realpath "./workdir/mirte_orangepi3b_installer.img") # finalize installer
+                    ./scripts/finalize.sh $(realpath "./workdir/mirte_orangepi3b_installer.img") ${{ inputs.mirte_type }} # finalize installer
                     df -h
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
