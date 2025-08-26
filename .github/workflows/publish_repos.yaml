@@ -25,7 +25,7 @@ jobs:
             - name: upload repos
               run: |
                 # for every repo in default_repos.yaml create a zip file and upload it to the release
-
+                repos_file="default_repos.yaml"
                 # get the list of packages from repos.yaml
                 packages=$(yq e '.repositories[].url' "$repos_file")
                 branches=$(yq e '.repositories[].version' "$repos_file")
