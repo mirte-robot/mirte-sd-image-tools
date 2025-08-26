@@ -103,3 +103,16 @@ jobs:
               with:
                 path: build/*installer*.img.xz
                 name: mirte_installer_orangepi3b
+            - name: Upload to surfdrive with curl
+              # if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                # // create folder with tag name, ignore error if exists
+                dir=${{ github.event.release.tag_name }}
+                echo "Uploading to surfdrive folder $dir"
+                # if dir is empty, use "latest"
+                if [ -z "$dir" ]; then
+                  dir="latest"
+                fi
+                curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/$dir/" || true
+                curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/files/public.php/webdav/$dir/"
+
