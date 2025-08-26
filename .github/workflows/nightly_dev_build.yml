@@ -81,3 +81,4 @@ jobs:
        uses: mirte-robot/mirte-sd-image-tools/.github/workflows/buildFork.yaml@develop
        with:
          branch: "develop"
+       secrets: inherit
