@@ -27,15 +27,9 @@ pip3 install vcstool
 apt install -y python3-pip python3-dev libblas-dev liblapack-dev libatlas-base-dev gfortran
 cd /usr/local/src/mirte/
 # Download all the mirte repos
-vcs import --workers 1 --input ./repos.yaml --skip-existing || true
-# Initialize the submodule of mirte-telemetrix-cpp
-if [ -d ./mirte-telemetrix-cpp ]; then
-	cd mirte-telemetrix-cpp
-	git submodule update --init --recursive
-	cd -
-fi
+vcs import --workers 1 --input ./repos.yaml --skip-existing --shallow || true
 
-pip3 install "deepdiff[cli]"
+# pip3 install "deepdiff[cli]"
 # deep diff --ignore-order --ignore-string-case ./repos.yaml ./mirte-install-scripts/repos.yaml # to show the difference between the repos.yaml in here and in mirte-install-scripts/repos.yaml
 # overwrite the repos.yaml in mirte-install-scripts with the one in here
 cp ./repos.yaml ./mirte-install-scripts/repos.yaml
@@ -75,4 +69,4 @@ if $ADD_OVERLAY_PARTITION; then
 	systemctl disable armbian-resize-filesystem # this will be done better by our script
 fi
 
-sudo apt autoremove && sudo apt clean
+sudo apt autoremove && sudo apt clean && sudo rm -rf /var/lib/apt/lists/*

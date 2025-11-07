@@ -31,12 +31,15 @@ on:
         sbc:
             required: false
             type: choice
-            default: orangepizero2
+            default: mirte_orangepizero2
             options:
-              - orangepizero2
-              - orangepi3b
-              - rpi4b
-
+              - mirte_orangepizero2
+              - mirte_orangepi3b
+              - mirte_rpi4b
+        branch:
+            required: false
+            type: string
+            default: "develop"
 permissions:
     contents: write
   
@@ -88,7 +91,7 @@ jobs:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: setup build files
               run: |
-                  if [[ "${{ inputs.branch }}" == "develop" ]]; then
+                  if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
                     cp develop_repos.yaml repos.yaml
                     echo "Using develop_repos.yaml"
                   fi

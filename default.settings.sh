@@ -20,6 +20,7 @@ export EXTRA_SCRIPTS=(
 )
 export PARALLEL=true
 export ADD_OVERLAY_PARTITION=true
+export INSTALL_ARDUINO_ALL=false # install all arduino&pico things (compiler, sdks, ...)
 # Functional Settings:
 #  - INSTALL_WEB
 #  - INSTALL_PYTHON
