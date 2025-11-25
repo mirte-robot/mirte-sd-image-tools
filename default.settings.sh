@@ -18,7 +18,7 @@ export EXTRA_SCRIPTS=(
 	# "testExtra.sh"
 	# "testExtra2.sh"
 )
-export PARALLEL=true
+export PARALLEL=false
 export ADD_OVERLAY_PARTITION=true
 export INSTALL_ARDUINO_ALL=false # install all arduino&pico things (compiler, sdks, ...)
 # Functional Settings:
