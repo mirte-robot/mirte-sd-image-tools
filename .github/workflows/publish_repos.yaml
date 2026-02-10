@@ -4,7 +4,6 @@ on:
   release:
     types: [published]
 
-
 permissions:
     contents: write
 
@@ -43,3 +42,25 @@ jobs:
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: "*.zip"
+    copy-uf2:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Copy uf2 from release of $OWNER/telemetrix4rpipico of the same release tag
+              run: |
+                RELEASE_TAG="${GITHUB_REF#refs/tags/}"
+                echo "Release tag: $RELEASE_TAG"
+                OWNER=${{ github.repository_owner }}
+                API_URL="https://api.github.com/repos/$OWNER/telemetrix4rpipico/releases/tags/$RELEASE_TAG"
+                echo "API URL: $API_URL"
+                ASSET_URL=$(curl -s $API_URL | jq -r '.assets[] | select(.name | endswith(".uf2")) | .browser_download_url')
+                echo "Asset URL: $ASSET_URL"
+                curl -L -o Telemetrix4RpiPico.uf2 "$ASSET_URL"
+                # also download .elf file
+                ASSET_URL_ELF=$(curl -s $API_URL | jq -r '.assets[] | select(.name | endswith(".elf")) | .browser_download_url')
+                echo "Asset URL ELF: $ASSET_URL_ELF"
+                curl -L -o Telemetrix4RpiPico.elf "$ASSET_URL_ELF"
+            - name: Push uf2 and elf to release
+              uses: softprops/action-gh-release@v2
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  files: "Telemetrix4RpiPico.uf2, Telemetrix4RpiPico.elf"
