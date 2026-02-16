@@ -13,6 +13,7 @@ if [ ! -f "pishrink.sh" ]; then
 	wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O pishrink.sh
 	chmod +x pishrink.sh
 fi
-
-cp -n default.settings.sh settings.sh
-cp -n default_repos.yaml repos.yaml
+cp settings.sh settings.old.sh || true
+cp default_repos.yaml default_repos.old.yaml || true
+cp default.settings.sh settings.sh
+cp default_repos.yaml repos.yaml

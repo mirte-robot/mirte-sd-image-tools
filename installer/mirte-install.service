@@ -1,0 +1,11 @@
+[Unit]
+Description=Mirte Install Service
+After=network.target
+
+[Service]
+ExecStart=/root/mirte-install.sh
+Restart=no
+User=root
+
+[Install]
+WantedBy=multi-user.target

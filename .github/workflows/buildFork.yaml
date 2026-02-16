@@ -1,0 +1,65 @@
+name: Build and Upload
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: false
+        type: string
+        default: main
+
+permissions:
+    contents: write
+    actions: write
+    repository-projects: write
+    pull-requests: write
+  
+jobs:
+    shellcheck:
+      uses: ./.github/workflows/shellcheck.yml
+    shfmt:
+      uses: ./.github/workflows/shfmt.yml
+    repocheck:
+      uses: ./.github/workflows/repocheck.yml
+    build-and-push:
+        needs: [shellcheck, shfmt, repocheck]
+        strategy:
+            matrix:
+                image: [ 
+                        mirte_orangepizero2,
+                        mirte_orangepi3b,
+                        mirte_rpi4b,
+                        # mirte_orangepizero2_noble
+                        ]
+            fail-fast: false
+        uses: ./.github/workflows/build_single.yaml
+        with:
+          sbc: ${{ matrix.image }}
+          branch: ${{ inputs.branch }}
+        if:  ${{ ! startsWith(github.event.head_commit.message, 'x')}}
+        secrets: inherit
+    master-build-and-push:
+        needs: [shellcheck, shfmt, repocheck]
+        if:  ${{ ! startsWith(github.event.head_commit.message, 'x') }}
+        # strategy:
+        #     matrix:
+        #         image: [ 
+        #                 # mirte_orangepizero2,
+        #                 mirte_orangepi3b
+        #                 ]
+        #     fail-fast: false
+        uses: ./.github/workflows/build_single.yaml
+        with:
+          mirte_type: mirte-master
+          sbc: mirte_orangepi3b
+          branch: ${{ inputs.branch }}
+        secrets: inherit
+    overlay-build-and-push:
+        needs: [shellcheck, shfmt, repocheck]
+        if:  ${{ ! startsWith(github.event.head_commit.message, 'x') }}
+        uses: ./.github/workflows/create_overlay.yaml
+        with:
+          branch: ${{ inputs.branch }}
+        secrets: inherit
+      
+            

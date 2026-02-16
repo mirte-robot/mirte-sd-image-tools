@@ -1,0 +1,150 @@
+name: Build and Upload
+
+
+# build a single image, based on sbc and type inputs.
+# uploads to artifacts and releases
+# runs installer build if mirte-master
+on:
+  workflow_call:
+    inputs:
+        mirte_type:
+            required: false
+            type: string
+            default: default
+        sbc:
+            required: false
+            type: string
+            default: orangepizero2
+        branch:
+            required: false
+            type: string
+            default: "main"
+  workflow_dispatch:
+    inputs:
+        mirte_type:
+            required: true
+            type: choice
+            default: default
+            options:
+              - default
+              - mirte-master
+        sbc:
+            required: false
+            type: choice
+            default: mirte_orangepizero2
+            options:
+              - mirte_orangepizero2
+              - mirte_orangepi3b
+              - mirte_rpi4b
+        branch:
+            required: false
+            type: string
+            default: "develop"
+permissions:
+    contents: write
+  
+jobs:
+    build-and-push:
+        # container:
+        #   image: ubuntu:22.04
+        #   options: --privileged
+        runs-on: ubuntu-22.04-arm
+        
+        steps:
+            - name: Maximize build space
+              uses: AdityaGarg8/remove-unwanted-software@v5
+              if: ${{ !env.ACT && runner.arch != 'ARM' && runner.arch != 'ARM64' }}
+              with:
+                remove-android: 'true'
+                remove-dotnet: 'true'
+                remove-haskell: 'true'
+                remove-docker-images: 'true'
+                remove-large-packages: 'true'
+                remove-cached-tools: 'true'
+                remove-codeql: 'true'
+                remove-swapfile: 'true'
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                ref: ${{ inputs.branch }}
+            - name: Extract branch name
+              shell: bash
+              run: |
+                echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+                echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+                if [[ "${{ inputs.mirte_type }}" != "default" ]]; then
+                    echo "artifact_name=${{ inputs.mirte_type }}_${{ inputs.sbc }}" | tr '-' '_' >> $GITHUB_OUTPUT
+                else
+                    echo "artifact_name=${{ inputs.sbc }}" >> $GITHUB_OUTPUT
+                fi
+                echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+              id: extract_branch
+            - name: Set up QEMU
+              uses: docker/setup-qemu-action@v3
+            - name: setup this repo
+              run: |
+                    sudo apt update
+                    sudo apt install qemu-user-static parted -y
+                    ./packerInstall.sh
+              env:
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: setup build files
+              run: |
+                  if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
+                    cp develop_repos.yaml repos.yaml
+                    echo "Using develop_repos.yaml"
+                  fi
+                  echo -e "MIRTE_TYPE=${{ inputs.mirte_type }}" >> settings.sh
+                  #   if [[ "${{ inputs.mirte_type }}" != "default" || "${{ inputs.sbc }}" != "orangepizero2" ]]; then
+                  #     echo -e "ADD_OVERLAY_PARTITION=false" >> settings.sh
+                  # fi
+                  cat settings.sh
+                  # - name: setup repos
+            #   run: |
+            #     cp main_repos.yaml repos.yaml
+            #     yq e -i '.repositories.mirte-ros-packages.version = "fix-intro-rob"' repos.yaml
+            #     yq e -i '.repositories.mirte-telemetrix4arduino.url =  "https://github.com/arendjan/telemetrix4arduino.git"' repos.yaml
+            #     yq e -i '.repositories.mirte-telemetrix4arduino.version = "fix-intro-robotics"' repos.yaml
+            - name: Build
+              run: |
+                    cat repos.yaml
+                    ./packerBuild.sh ${{ inputs.sbc }}
+              env:
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: artifacts
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                path: build/*.img.xz
+                name: ${{ steps.extract_branch.outputs.artifact_name }}
+            # - name: Push to release
+            #   uses: softprops/action-gh-release@v2
+            #   if: startsWith(github.ref, 'refs/tags/')
+            #   with:
+            #       files: build/*.img.xz
+            - name: Upload to surfdrive with curl if release
+              # if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                # // create folder with tag name, ignore error if exists
+                dir=${{ github.event.release.tag_name }}
+                echo "Uploading to surfdrive folder $dir"
+                # if dir is empty, use "latest"
+                if [ -z "$dir" ]; then
+                  dir="latest"
+                fi
+                curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
+
+    build_installer_all:
+      # TODO: Add a flag for building installers, based on some configuration
+      if: ${{ endsWith(inputs.sbc, 'orangepi3b') }}
+      needs: [build-and-push]
+      uses: ./.github/workflows/build_installer.yaml
+      with:
+        # download_artifacts: true
+        mirte_type: ${{ inputs.mirte_type }}
+        sbc: ${{ inputs.sbc }}
+        branch: ${{ inputs.branch }}
+      secrets: inherit
+              

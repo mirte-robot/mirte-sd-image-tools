@@ -1,40 +1,74 @@
-# Build Mirte image using Packer
+# mirte-sd-image-tools
 
-## Install
-run sudo `./packerInstall.sh` to download required packages.
+This repository uses Packer to create new MIRTE OS sd card images,
+and modify exisiting images. Please read the [MIRTE documentation](https://docs.mirte.org/)
+on how to use the sd images.
 
-## Build
-Run sudo `./packerBuild.sh` to build the image. Will take some time
-Put your local files in `git_local/` and they will be copied
-edit `settings.sh` to select features and extra scripts and edit `repos.yaml` to select the repositories/branches.
+## Install requirements (for local build)
 
-## Build as workflow in Docker
-Install [act](https://github.com/nektos/act) and run `./actBuild.sh`. It will run the workflows and copy the artifacts to `./artifacts/`. This will not use any changes in git_local or repos.yaml.
+In order to build new sd images one needs an installation of Packer:
 
-## Shell to edit
-run ./shell.sh \<img file> and you will get a shell after some time. You can create new shells by using `sudo chroot /tmp/armimg-XXX`. Stop by removing the `/stopshell` file. It will create your fresh image in `shell_workdir`.
-
-# /bin/sh Exec format error:
 ```sh
-sudo apt remove qemu-user-static -y && sudo apt install qemu-user-static
+sudo ./packerInstall.sh
 ```
 
-# VCS issues:
-When you get 
-```
-=== ./mirte-arduino-libraries (git) ===
-    arm-image.mirte_orangepizero: Could not clone repository 'https://github.com/arendjan/mirte-arduino-libraries.git': fatal: destination path '.' already exists and is not an empty directory.
-```
-when building for orange pi Zero (1), you have a qemu version that has some issues, including a ``` qemu: uncaught target signal 11 (segmentation fault) - core dumped``` when using git. Update the qemu installation on your host computer by adding a ppa ( ```sh sudo add-apt-repository ppa:canonical-server/server-backports```) and updating qemu. This should resolve the issues.
+## Build locally
 
-# TODOS:
-- npm prebuilt
+### Default repositories
 
-# Editing the latest build
-Install gh or download from releases.
+To build the MIRTE OS sd images (you can grab a coffee), you can just run:
+
+```sh
+sudo ./packerBuild.sh
 ```
-gh run download #select type
-sudo ./shell.sh ...
-# at end, exit out of the chroot
-# output in shell_workdir/....shrunk_$date.img.xz
+
+### Custom repositories
+
+To build the MIRTE OS sd images based on custom repositories, you can modify
+the repos.yaml file to point the repositories to the sources you want to have
+build in the sd image (eg. your own forks).
+
+You can also create the image based on local repositories (eg. with code not 
+pushed to github yet). Place the repositories in the folder called 'git_local'.
+
+### Custom settings
+
+You can also specify which features you want included in the image. In that
+way you can for example create an image with just ROS, but not the 
+web interface and/or python. This can be done by changing the settings
+in `settings.sh`.
+
+### Using github actions 
+
+To run github actions locally, can install [act](https://github.com/nektos/act)
+and run: 
+
 ```
+./actBuild.sh
+```
+It will run the workflows and copy the artifacts to `./artifacts/`. This will
+not use any changes in git_local or repos.yaml.
+
+## Build on github
+
+You can also build an image using github actions. The same customization
+is possible as with the locally built builds. Please note that teh nightly
+(development) builds are disabled by default.
+
+## Edit existing images
+
+In case you want to modify an existing image (eg. a release from MIRTE OS),
+you can also modify this. You will get a shell to make modifications
+to the image:
+
+```
+./shell.sh <mirte_os_image>.img
+
+```
+
+By removing the `/stopshell` file, and it will finalize (eg. shrink) the image
+and place it in `./shell_workdir/`.
+
+## License
+
+This work is licensed under a Apache-2.0 OSS license.

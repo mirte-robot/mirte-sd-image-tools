@@ -4,9 +4,12 @@
 /pishrink.sh
 /test
 settings.sh
+settings.old.sh
 logs/
 workdir/
 settings.sh
 shell_workdir/
 repos.yaml
+repos.old.yaml
 artifacts/
+artifacts_temp/

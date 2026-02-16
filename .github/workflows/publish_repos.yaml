@@ -9,13 +9,6 @@ permissions:
 
 jobs:
     upload-repos:
-        # container:
-        #   image: ubuntu:22.04
-        #   options: --privileged
-        
-
-
-
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
