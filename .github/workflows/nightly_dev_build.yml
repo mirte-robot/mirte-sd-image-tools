@@ -1,0 +1,84 @@
+name: Nightly Development Build
+
+on:
+    schedule:
+      - cron: '0 0 * * *' # Scheduled workflows will only run on main branch
+    workflow_dispatch:
+    release:
+        types: [published]
+
+permissions:
+    contents: write
+    actions: write
+    repository-projects: write
+    pull-requests: write
+jobs:
+    check-repo-changes:
+      # We can not use "if: github.event_name == 'schedule'" for this job
+      # since the nighlt-build job needs it. So we have to set this "if"
+      # for each individual step.
+      # NOTE: The scheduled nightly builds will only be build on our own
+      # repository.
+      if: github.triggering_actor != 'github-actions[bot]'
+      outputs:
+        repo_changes: ${{ steps.check.outputs.repo_changes }}
+      runs-on: ubuntu-22.04
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      steps:
+        - name: Checkout repository
+          if: github.event_name != 'schedule'
+              || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
+          uses: actions/checkout@v4
+          with:
+             ref: develop
+        - name: Check repo updates
+          if: github.event_name != 'schedule'
+              || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
+          id: check
+          continue-on-error: true
+          run: |
+            sudo apt update
+            curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.deb.sh | sudo bash
+            sudo apt-get update
+            sudo apt-get install python3-vcstool -y
+            mkdir check
+            vcs import --shallow --input develop_repos.yaml check
+            cd check
+            CHANGES=false
+            for repo in $(ls); do
+                cd $repo
+                THISCHANGES=$(git log --since="24 hours ago" | wc -l)
+                if [[ $THISCHANGES -ne 0 ]]; then
+                    CHANGES=true
+                    echo "repo $repo has a commit in the last 24H"
+                fi
+                cd ..
+            done
+            cd ..
+            THISCHANGES=$(git log --since="24 hours ago" | wc -l) # check the main repo
+            if [[ $THISCHANGES -ne 0 ]]; then
+                CHANGES=true
+                echo "repo sd image tools has a commit in the last 24H"
+            fi
+            if [[ $CHANGES == true ]]; then
+                echo "There are changes in the last 24H, continue schedule!"
+                echo "repo_changes=true" >> $GITHUB_OUTPUT
+            else
+                # Rerun this job via the cleanup workflow, to make sure
+                # the status will be 'skipped'. Unfortunately there is
+                # no nice way to set a running job to skipped.
+                gh workflow run cleanup.yaml --ref main --field original_run_id=${{ github.run_id }}
+            fi
+    nightly-build:
+       # This build can be started manually, or from schedule when the repo's 
+       # have changed in the past 24hrs. This schedule will, by default,
+       # only be ran from our own organization.
+       needs: check-repo-changes
+       if: >
+           needs.check-repo-changes.outputs.repo_changes == 'true'
+           || github.event_name != 'schedule'
+       uses: mirte-robot/mirte-sd-image-tools/.github/workflows/buildFork.yaml@develop
+       with:
+         branch: "develop"
+       secrets: inherit

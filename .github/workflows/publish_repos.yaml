@@ -1,40 +1,59 @@
 name: Publish other repos
 
 on:
-    release:
-        types: [published]
+  release:
+    types: [published]
+
 permissions:
     contents: write
 
 jobs:
     upload-repos:
-        # container:
-        #   image: ubuntu:22.04
-        #   options: --privileged
-        runs-on: ubuntu-22.04
-        strategy:
-            matrix:
-                repo:
-                    [
-                        "mirte-install-scripts",
-                        "mirte-ros-packages",
-                        "mirte-python",
-                        "telemetrix4rpipico",
-                        "mirte-web-interface",
-                        "mirte-frame",
-                        "tmx-pico-aio",
-                        "telemetrix-aio",
-                        "telemetrix4arduino",
-                        "mirte-pcb",
-                        "mirte-documentation",
-                    ]
-            fail-fast: false
+        runs-on: ubuntu-latest
         steps:
-            - run: |
-                  git clone https://github.com/mirte-robot/${{ matrix.repo }}.git
-                  zip -r ${{ matrix.repo }}.zip ${{ matrix.repo }}
+            - name: Checkout repository
+              uses: actions/checkout@v5
+            - name: upload repos
+              run: |
+                # for every repo in default_repos.yaml create a zip file and upload it to the release
+                repos_file="default_repos.yaml"
+                # get the list of packages from repos.yaml
+                packages=$(yq e '.repositories[].url' "$repos_file")
+                branches=$(yq e '.repositories[].version' "$repos_file")
+
+                i=1
+                for package in $packages; do
+                    branch=$(echo "$branches" | sed -n "${i}p")
+                    i=$((i + 1))
+                    echo "Processing $package on branch $branch"
+                    git clone "$package" --branch "$branch"
+                    repo_name=$(basename "$package" .git)
+                    zip -r "$repo_name".zip "$repo_name"
+                done
             - name: Push to release
               uses: softprops/action-gh-release@v2
               if: startsWith(github.ref, 'refs/tags/')
               with:
-                  files: ${{ matrix.repo }}.zip
+                  files: "*.zip"
+    copy-uf2:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Copy uf2 from release of $OWNER/telemetrix4rpipico of the same release tag
+              run: |
+                RELEASE_TAG="${GITHUB_REF#refs/tags/}"
+                echo "Release tag: $RELEASE_TAG"
+                OWNER=${{ github.repository_owner }}
+                API_URL="https://api.github.com/repos/$OWNER/telemetrix4rpipico/releases/tags/$RELEASE_TAG"
+                echo "API URL: $API_URL"
+                ASSET_URL=$(curl -s $API_URL | jq -r '.assets[] | select(.name | endswith(".uf2")) | .browser_download_url')
+                echo "Asset URL: $ASSET_URL"
+                curl -L -o Telemetrix4RpiPico.uf2 "$ASSET_URL"
+                # also download .elf file
+                ASSET_URL_ELF=$(curl -s $API_URL | jq -r '.assets[] | select(.name | endswith(".elf")) | .browser_download_url')
+                echo "Asset URL ELF: $ASSET_URL_ELF"
+                curl -L -o Telemetrix4RpiPico.elf "$ASSET_URL_ELF"
+            - name: Push uf2 and elf to release
+              uses: softprops/action-gh-release@v2
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  files: "Telemetrix4RpiPico.uf2, Telemetrix4RpiPico.elf"

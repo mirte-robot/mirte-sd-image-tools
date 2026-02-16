@@ -1,0 +1,38 @@
+name: Cleanup run
+
+on:
+  workflow_dispatch:
+    inputs:
+      original_run_id:
+        description: "Run ID to rerun"
+        type: number
+        required: true
+
+jobs:
+  remove-previous-reruns:
+      if: github.run_attempt == 1
+      runs-on: ubuntu-latest
+      permissions:
+        actions: write
+        contents: read
+      steps:
+        - name: Delete workflow runs
+          uses: Mattraks/delete-workflow-runs@v2
+          with:
+            token: ${{ github.token }}
+            repository: ${{ github.repository }}
+            delete_workflow_pattern: "Cleanup"
+            keep_minimum_runs: 0
+            retain_days: 0
+  rerun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+      - name: Rerun the original workflow
+        run: |
+          gh run rerun ${{ github.event.inputs.original_run_id }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
