@@ -41,7 +41,7 @@ jobs:
                 remove-codeql: 'true'
                 remove-swapfile: 'true'
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                  ref: ${{ inputs.branch }}
             - name: Extract branch name

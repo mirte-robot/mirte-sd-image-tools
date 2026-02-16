@@ -29,7 +29,7 @@ jobs:
         - name: Checkout repository
           if: github.event_name != 'schedule'
               || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
-          uses: actions/checkout@v4
+          uses: actions/checkout@v6
           with:
              ref: develop
         - name: Check repo updates

@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
             - name: upload repos
               run: |
                 # for every repo in default_repos.yaml create a zip file and upload it to the release

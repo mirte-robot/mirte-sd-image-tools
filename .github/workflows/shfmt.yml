@@ -7,7 +7,7 @@ jobs:
   sh-checker:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run the sh-checker
         uses: luizm/action-sh-checker@master
         env:
