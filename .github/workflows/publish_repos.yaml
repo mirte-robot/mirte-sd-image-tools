@@ -31,7 +31,7 @@ jobs:
                     zip -r "$repo_name".zip "$repo_name"
                 done
             - name: Push to release
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: "*.zip"
@@ -53,7 +53,7 @@ jobs:
                 echo "Asset URL ELF: $ASSET_URL_ELF"
                 curl -L -o Telemetrix4RpiPico.elf "$ASSET_URL_ELF"
             - name: Push uf2 and elf to release
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: "Telemetrix4RpiPico.uf2, Telemetrix4RpiPico.elf"
