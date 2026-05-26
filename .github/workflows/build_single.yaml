@@ -81,7 +81,7 @@ jobs:
 
               id: extract_branch
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
+              uses: docker/setup-qemu-action@v4
             - name: setup this repo
               run: |
                     sudo apt update
