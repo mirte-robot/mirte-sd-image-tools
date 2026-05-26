@@ -36,3 +36,5 @@ jobs:
               with:
                 folder: build
                 name: overlay
+                SURFDRIVE_USER: ${{ secrets.SURFDRIVE_USER }}
+                SURFDRIVE_TOKEN: ${{ secrets.SURFDRIVE_TOKEN }}
