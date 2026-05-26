@@ -26,6 +26,7 @@ runs:
                 # name: ${{ inputs.name }}
                 archive: false
             - name: Push to release
+              continue-on-error: true # sometimes file too big.
               uses: softprops/action-gh-release@v3
               if: startsWith(github.ref, 'refs/tags/')
               with:
