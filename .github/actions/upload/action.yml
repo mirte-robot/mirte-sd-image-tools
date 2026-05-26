@@ -22,7 +22,7 @@ runs:
               uses: actions/upload-artifact@v7
               if: always()
               with:
-                path: build/*.img.xz
+                path: ${{ inputs.folder }}/*.img.xz
                 # name: ${{ inputs.name }}
                 archive: false
             - name: Push to release
@@ -60,15 +60,15 @@ runs:
                 if [ "$dir" = "latest" ]; then
                   dir="latest"
                   # delete the latest folder if it exists
-                  curl -X DELETE -u ${{ github.event.inputs.SURFDRIVE_USER }}:${{ github.event.inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                  curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
                 fi
-                curl -X MKCOL -u ${{ github.event.inputs.SURFDRIVE_USER }}:${{ github.event.inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
-                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ github.event.inputs.SURFDRIVE_USER }}:${{ github.event.inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
+                curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
                 # create a file with the commit hash, url and date of the upload and upload it to surfdrive
                 echo "Commit: ${{ github.sha }}" > upload_info.txt
                 echo "URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> upload_info.txt
                 echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> upload_info.txt
-                curl -T upload_info.txt -u ${{ github.event.inputs.SURFDRIVE_USER }}:${{ github.event.inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                curl -T upload_info.txt -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
             - name: upload to release
               uses: softprops/action-gh-release@v3
               if: startsWith(github.ref, 'refs/tags/')
