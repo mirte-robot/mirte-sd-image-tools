@@ -51,13 +51,13 @@ jobs:
                 echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
               id: extract_branch
             - name: download from current build (default)
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type == 'default'}}
               with:
                 path: build
                 name: ${{ inputs.sbc }}
             - name: download from current build ()
-              uses: actions/download-artifact@v7
+              uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type != 'default' }}
               with:
                 path: build
