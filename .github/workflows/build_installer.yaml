@@ -41,7 +41,7 @@ jobs:
                 remove-codeql: 'true'
                 remove-swapfile: 'true'
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                  ref: ${{ inputs.branch }}
             - name: Extract branch name
@@ -51,13 +51,13 @@ jobs:
                 echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
               id: extract_branch
             - name: download from current build (default)
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type == 'default'}}
               with:
                 path: build
                 name: ${{ inputs.sbc }}
             - name: download from current build ()
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type != 'default' }}
               with:
                 path: build
@@ -93,13 +93,13 @@ jobs:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ inputs.mirte_type == 'mirte-master'  }}
               with:
                 path: build/*installer*.img.xz
                 name: mirte_master_installer_orangepi3b
             - name: artifacts_mirte
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               if: ${{ inputs.mirte_type == 'default' }}
               with:
                 path: build/*installer*.img.xz
