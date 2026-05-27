@@ -55,14 +55,14 @@ jobs:
               if: ${{ inputs.mirte_type == 'default'}}
               with:
                 path: build
-                name: ${{ inputs.sbc }}
+                pattern: mirte_${{ inputs.sbc }}_2*.img.xz # mirte_orangepizero2_2026-05-27_03_04_04.img.xz mirte_orangepi3b_2026-05-27_03_02_21.img.xz
+                # name: ${{ inputs.sbc }}
             - name: download from current build ()
               uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type != 'default' }}
               with:
                 path: build
-                # FIXME: Currently hardcoded for the mirte-master
-                name: mirte_master_${{ inputs.sbc }}
+                pattern: mirte_${{ inputs.sbc }}_${{ inputs.mirte_type }}_2*.img.xz # mirte_orangepi3b_mirte-master_2026-05-27_03_07_01.img.xz
             - name: Create installer
               run: |
                     sudo apt update
@@ -71,6 +71,7 @@ jobs:
                     ls
                     # tree
                     ls build
+                    # TODO: it could also be a different sbc, but for now keep it 3b.
                     mv build/**/*.img.xz build/mirte_orangepi3b.img.xz || mv build/*.img.xz build/mirte_orangepi3b.img.xz || true
                     # xz -d --keep build/mirte_orangepi3b.img.xz
                     xzcat build/mirte_orangepi3b.img.xz | md5sum >build/mirte_orangepi3b.img.md5sum
@@ -97,7 +98,7 @@ jobs:
                 folder: build
                 SURFDRIVE_USER: ${{ secrets.SURFDRIVE_USER }}
                 SURFDRIVE_TOKEN: ${{ secrets.SURFDRIVE_TOKEN }}
-                
+
                 # name: ${{ inputs.sbc }}_installer
             # - name: artifacts
             #   uses: actions/upload-artifact@v7
