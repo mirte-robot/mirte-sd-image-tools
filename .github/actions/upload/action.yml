@@ -18,7 +18,10 @@ inputs:
     description: Whether to delete the surfdrive directory before uploading (useful for "latest" uploads)
     required: false
     default: "false"
-
+  skip_surfdrive:
+    description: Whether to skip uploading to surfdrive as its too slow
+    required: false
+    default: "auto"
 runs:
   using: "composite"
   steps:
@@ -55,7 +58,21 @@ runs:
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: ${{ inputs.folder }}/*.img.xz
+            - name: check if skip surfdrive should be auto
+              id: check_skip
+              shell: bash
+              run: |
+                if [ "${{ inputs.skip_surfdrive }}" = "auto" ]; then
+                  # if its a release, do not skip, otherwise skip
+                  if startsWith("${{ github.ref }}", 'refs/tags/'); then
+                    echo "skip_surfdrive=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "skip_surfdrive=true" >> $GITHUB_OUTPUT
+                  fi
+                else
+                  echo "skip_surfdrive=${{ inputs.skip_surfdrive }}" >> $GITHUB_OUTPUT
             - name: Upload to surfdrive with curl
+              if: ${{ inputs.skip_surfdrive != 'true' }}
               shell: bash
               run: |
                 # // create folder with tag name, ignore error if exists
@@ -79,50 +96,3 @@ runs:
               if: startsWith(github.ref, 'refs/tags/')
               with:
                   files: ${{ inputs.folder }}/*.img.xz # these are renamed if a tag is present
-
-            # - name: Checkout repository
-            #   uses: actions/checkout@v6
-            # - name: Extract branch name
-            #   shell: bash
-            #   run: |
-            #     echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-            #     echo "sha_short=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
-            #   id: extract_branch
-            # - name: Download artifact
-            #   id: download
-            #   uses: actions/download-artifact@v8
-            #   with:
-            #     path: upload
-
-            # - name: List artifact
-            #   run: |
-            #     ls ${{ github.workspace }}
-            #     mkdir ${{ github.workspace }}/upload/mirte
-            #     ls ${{ github.workspace }}/upload
-            #     tree ${{ github.workspace }}/upload
-            #     # for every file ending in .img.xz, remove last part of the path
-            #     for file in $(find ${{ github.workspace }}/upload/ -name '*.img.xz'); do
-            #         f=$(basename $file)
-            #         echo $f
-            #         echo ${{ github.workspace }}/upload/mirte/"${f%_*_*_*_*}.${f#*.}"
-            #         mv $file ${{ github.workspace }}/upload/mirte/"${f%_*_*_*_*}.${f#*.}"
-            #     done
-            # - name: Upload to private server
-            #   if: ${{ !env.ACT }}
-            #   run: |
-            #     sudo apt update
-            #     sudo apt install sshpass
-            #     mkdir -p ~/.ssh
-            #     ssh-keyscan arend-jan.com >> ~/.ssh/known_hosts
-            #     export SSHPASS=${{ secrets.MIRTEFILES }}
-            #     sshpass -e sftp mirtefiles@arend-jan.com << ASDF
-            #         rm files/${{ steps.extract_branch.outputs.branch }}_old_${{ inputs.name }}/*
-            #         rmdir files/${{ steps.extract_branch.outputs.branch }}_old_${{ inputs.name }}
-            #         rename files/${{ steps.extract_branch.outputs.branch }}_${{ inputs.name }} files/${{ steps.extract_branch.outputs.branch }}_old_${{ inputs.name }}
-            #         mkdir files/${{ steps.extract_branch.outputs.branch }}_${{ inputs.name }}
-            #         ! touch uploading.txt
-            #         put uploading.txt files/${{ steps.extract_branch.outputs.branch }}_${{ inputs.name }}/uploading.txt
-            #         put upload/mirte/* /files/${{ steps.extract_branch.outputs.branch }}_${{ inputs.name }}/
-            #         rm files/${{ steps.extract_branch.outputs.branch }}_${{ inputs.name }}/uploading.txt
-            #         bye
-            #     ASDF
