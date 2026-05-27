@@ -64,15 +64,16 @@ runs:
               run: |
                 if [ "${{ inputs.skip_surfdrive }}" = "auto" ]; then
                   # if its a release, do not skip, otherwise skip
-                  if startsWith("${{ github.ref }}", 'refs/tags/'); then
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
                     echo "skip_surfdrive=false" >> $GITHUB_OUTPUT
                   else
                     echo "skip_surfdrive=true" >> $GITHUB_OUTPUT
                   fi
                 else
                   echo "skip_surfdrive=${{ inputs.skip_surfdrive }}" >> $GITHUB_OUTPUT
+                fi
             - name: Upload to surfdrive with curl
-              if: ${{ inputs.skip_surfdrive != 'true' }}
+              if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
               shell: bash
               run: |
                 # // create folder with tag name, ignore error if exists

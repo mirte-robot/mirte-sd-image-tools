@@ -70,6 +70,7 @@ jobs:
                     ./packerInstall.sh
                     ls
                     # tree
+                    echo "Files in build before creating installer:"
                     ls build
                     # TODO: it could also be a different sbc, but for now keep it 3b.
                     mv build/**/*.img.xz build/mirte_orangepi3b.img.xz || mv build/*.img.xz build/mirte_orangepi3b.img.xz || true
