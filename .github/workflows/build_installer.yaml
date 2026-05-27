@@ -55,14 +55,14 @@ jobs:
               if: ${{ inputs.mirte_type == 'default'}}
               with:
                 path: build
-                pattern: mirte_${{ inputs.sbc }}_2*.img.xz # mirte_orangepizero2_2026-05-27_03_04_04.img.xz mirte_orangepi3b_2026-05-27_03_02_21.img.xz
+                pattern: ${{ inputs.sbc }}_2*.img.xz # mirte_orangepizero2_2026-05-27_03_04_04.img.xz mirte_orangepi3b_2026-05-27_03_02_21.img.xz
                 # name: ${{ inputs.sbc }}
             - name: download from current build ()
               uses: actions/download-artifact@v8
               if: ${{ inputs.mirte_type != 'default' }}
               with:
                 path: build
-                pattern: mirte_${{ inputs.sbc }}_${{ inputs.mirte_type }}_2*.img.xz # mirte_orangepi3b_mirte-master_2026-05-27_03_07_01.img.xz
+                pattern: ${{ inputs.sbc }}_${{ inputs.mirte_type }}_2*.img.xz # mirte_orangepi3b_mirte-master_2026-05-27_03_07_01.img.xz
             - name: Create installer
               run: |
                     sudo apt update
