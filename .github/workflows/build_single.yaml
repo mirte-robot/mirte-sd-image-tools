@@ -80,8 +80,6 @@ jobs:
                 echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
               id: extract_branch
-            - name: download telemetrix4rpipico uf2 from correct branch
-              run: |
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v4
             - name: setup this repo
@@ -92,6 +90,8 @@ jobs:
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: setup build files
+              env:
+                GH_TOKEN: ${{ github.token }}
               run: |
                   if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
                     cp develop_repos.yaml repos.yaml
