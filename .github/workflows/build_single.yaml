@@ -90,15 +90,15 @@ jobs:
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: setup build files
+              env:
+                GH_TOKEN: ${{ github.token }}
               run: |
-                  if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
+                  if [[ "${{ inputs.branch }}" != "main" ]]; then # TODO: this is better, but not perfect.
                     cp develop_repos.yaml repos.yaml
                     echo "Using develop_repos.yaml"
                   fi
                   echo -e "MIRTE_TYPE=${{ inputs.mirte_type }}" >> settings.sh
-                  #   if [[ "${{ inputs.mirte_type }}" != "default" || "${{ inputs.sbc }}" != "orangepizero2" ]]; then
-                  #     echo -e "ADD_OVERLAY_PARTITION=false" >> settings.sh
-                  # fi
+                  ./scripts/download_uf2.sh
                   cat settings.sh
                   # - name: setup repos
             #   run: |
