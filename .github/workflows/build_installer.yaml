@@ -66,6 +66,7 @@ jobs:
             - name: Create installer
               env:
                 GH_TOKEN: ${{ github.token }}
+                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                     sudo apt update
                     sudo apt install qemu-user-static parted -y
@@ -98,8 +99,6 @@ jobs:
                     df -h
                     ./scripts/finalize.sh $(realpath "./workdir/mirte_orangepi3b_installer.img") ${{ inputs.mirte_type }} # finalize installer
                     df -h
-              env:
-                PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: upload all
               uses: ./.github/actions/upload
               with:
