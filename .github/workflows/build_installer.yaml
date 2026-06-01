@@ -64,6 +64,8 @@ jobs:
                 path: build
                 pattern: ${{ inputs.sbc }}_${{ inputs.mirte_type }}_2*.img.xz # mirte_orangepi3b_mirte-master_2026-05-27_03_07_01.img.xz
             - name: Create installer
+              env:
+                GH_TOKEN: ${{ github.token }}
               run: |
                     sudo apt update
                     sudo apt install qemu-user-static parted -y
