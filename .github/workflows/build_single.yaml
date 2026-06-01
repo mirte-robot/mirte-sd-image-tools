@@ -80,6 +80,8 @@ jobs:
                 echo "NOW=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
               id: extract_branch
+            - name: download telemetrix4rpipico uf2 from correct branch
+              run: |
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v4
             - name: setup this repo
@@ -96,9 +98,7 @@ jobs:
                     echo "Using develop_repos.yaml"
                   fi
                   echo -e "MIRTE_TYPE=${{ inputs.mirte_type }}" >> settings.sh
-                  #   if [[ "${{ inputs.mirte_type }}" != "default" || "${{ inputs.sbc }}" != "orangepizero2" ]]; then
-                  #     echo -e "ADD_OVERLAY_PARTITION=false" >> settings.sh
-                  # fi
+                  ./scripts/download_uf2.sh
                   cat settings.sh
                   # - name: setup repos
             #   run: |

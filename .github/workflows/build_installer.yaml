@@ -69,6 +69,11 @@ jobs:
                     sudo apt install qemu-user-static parted -y
                     ./packerInstall.sh
                     ls
+                     if [[ "${{ steps.extract_branch.outputs.branch }}" == "develop" ]]; then
+                      cp develop_repos.yaml repos.yaml
+                      echo "Using develop_repos.yaml"
+                    fi
+                    ./scripts/download_uf2.sh
                     # tree
                     echo "Files in build before creating installer:"
                     ls build

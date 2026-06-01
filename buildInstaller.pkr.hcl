@@ -64,6 +64,10 @@ provisioner "file" {
     source = "installer/install.sh"
     destination = "/root/install.sh"
  }
+ provisioner "file" {
+    source = "git_local/Telemetrix4RpiPico.uf2"
+    destination = "/root/Telemetrix4RpiPico.uf2"
+ }
  provisioner "shell" {
     inline_shebang = "/bin/bash -e"
     inline = [
