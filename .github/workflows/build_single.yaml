@@ -93,7 +93,7 @@ jobs:
               env:
                 GH_TOKEN: ${{ github.token }}
               run: |
-                  if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
+                  if [[ "${{ inputs.branch }}" != "main" ]]; then # TODO: this is better, but not perfect.
                     cp develop_repos.yaml repos.yaml
                     echo "Using develop_repos.yaml"
                   fi
