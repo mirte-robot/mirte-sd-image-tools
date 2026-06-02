@@ -72,7 +72,7 @@ jobs:
                     sudo apt install qemu-user-static parted -y
                     ./packerInstall.sh
                     ls
-                     if [[ "${{ steps.extract_branch.outputs.branch }}" == "develop" ]]; then
+                     if [[ "${{ inputs.branch }}" == "develop" ]]; then
                       cp develop_repos.yaml repos.yaml
                       echo "Using develop_repos.yaml"
                     fi
