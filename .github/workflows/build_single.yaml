@@ -90,15 +90,15 @@ jobs:
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: setup build files
+              env:
+                GH_TOKEN: ${{ github.token }}
               run: |
-                  if [[ "${{ inputs.branch }}" == "develop" ]]; then # TODO: this does not work that nice with dispatch
+                  if [[ "${{ inputs.branch }}" != "main" ]]; then # TODO: this is better, but not perfect.
                     cp develop_repos.yaml repos.yaml
                     echo "Using develop_repos.yaml"
                   fi
                   echo -e "MIRTE_TYPE=${{ inputs.mirte_type }}" >> settings.sh
-                  #   if [[ "${{ inputs.mirte_type }}" != "default" || "${{ inputs.sbc }}" != "orangepizero2" ]]; then
-                  #     echo -e "ADD_OVERLAY_PARTITION=false" >> settings.sh
-                  # fi
+                  ./scripts/download_uf2.sh
                   cat settings.sh
                   # - name: setup repos
             #   run: |
@@ -112,29 +112,36 @@ jobs:
                     ./packerBuild.sh ${{ inputs.sbc }}
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: artifacts
-              uses: actions/upload-artifact@v7
-              if: always()
+            - name: Upload artifacts
+              uses: ./.github/actions/upload
               with:
-                path: build/*.img.xz
+                folder: build
                 name: ${{ steps.extract_branch.outputs.artifact_name }}
-            # - name: Push to release
-            #   uses: softprops/action-gh-release@v2
-            #   if: startsWith(github.ref, 'refs/tags/')
+                SURFDRIVE_USER: ${{ secrets.SURFDRIVE_USER }}
+                SURFDRIVE_TOKEN: ${{ secrets.SURFDRIVE_TOKEN }}
+            # - name: artifacts
+            #   uses: actions/upload-artifact@v7
+            #   if: always()
             #   with:
-            #       files: build/*.img.xz
-            - name: Upload to surfdrive with curl if release
-              # if: startsWith(github.ref, 'refs/tags/')
-              run: |
-                # // create folder with tag name, ignore error if exists
-                dir=${{ github.event.release.tag_name }}
-                echo "Uploading to surfdrive folder $dir"
-                # if dir is empty, use "latest"
-                if [ -z "$dir" ]; then
-                  dir="latest"
-                fi
-                curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
-                curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
+            #     path: build/*.img.xz
+            #     name: ${{ steps.extract_branch.outputs.artifact_name }}
+            # # - name: Push to release
+            # #   uses: softprops/action-gh-release@v2
+            # #   if: startsWith(github.ref, 'refs/tags/')
+            # #   with:
+            # #       files: build/*.img.xz
+            # - name: Upload to surfdrive with curl if release
+            #   # if: startsWith(github.ref, 'refs/tags/')
+            #   run: |
+            #     # // create folder with tag name, ignore error if exists
+            #     dir=${{ github.event.release.tag_name }}
+            #     echo "Uploading to surfdrive folder $dir"
+            #     # if dir is empty, use "latest"
+            #     if [ -z "$dir" ]; then
+            #       dir="latest"
+            #     fi
+            #     curl -X MKCOL -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+            #     curl -T build/*.img.xz -u ${{ secrets.SURFDRIVE_USER }}:${{ secrets.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
 
     build_installer_all:
       # TODO: Add a flag for building installers, based on some configuration

@@ -34,15 +34,12 @@ cd /tmp || exit 1
 rm -rf pico-sdk
 rm -rf picotool
 
-#  Download latest uf2 release, resulting in Telemetrix4RpiPico.uf2
+#  Should've been dowloaded already and put in /root, if not, download from release
 cd /root/ || exit 1
-# TODO:  Downlaods from arendjan/telemetrix4rpipico, as it isn't released yet on the official repo
-# curl -s https://api.github.com/repos/arendjan/telemetrix4rpipico/releases/latest |
-# 	grep ".*/Telemetrix4RpiPico.uf2" |
-# 	cut -d : -f 2,3 |
-# 	tr -d \" |
-# 	wget -qi -
-wget https://github.com/ArendJan/Telemetrix4RpiPico/releases/download/rolling/Telemetrix4RpiPico.uf2
+if [ ! -f Telemetrix4RpiPico.uf2 ]; then
+	echo "Telemetrix4RpiPico.uf2 not found in /root, trying to download from release"
+	curl -s https://api.github.com/repos/mirte-robot/telemetrix4rpipico/releases/latest | grep -F "browser_download_url" | awk -F\" '{print $4}' | grep "Telemetrix4RpiPico.*.uf2" | wget -i - -O Telemetrix4RpiPico.uf2
+fi
 
 pip install git+https://github.com/arendjan/tmx-pico-aio.git@modules
 

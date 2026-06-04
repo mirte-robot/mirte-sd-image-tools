@@ -13,3 +13,4 @@ repos.yaml
 repos.old.yaml
 artifacts/
 artifacts_temp/
+.vscode/

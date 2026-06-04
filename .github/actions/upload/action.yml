@@ -1,0 +1,99 @@
+name: Upload
+description: Upload all .img files in the build folder to artifacts and releases(if release), and to surfdrive.
+
+inputs:
+  folder:
+    description: img folder to use
+    required: true
+  name:
+    description: name to use for the release and artifact
+    required: false
+  SURFDRIVE_USER:
+    description: Username for surfdrive
+    required: true
+  SURFDRIVE_TOKEN:
+    description: Token for surfdrive
+    required: true
+  delete_dir:
+    description: Whether to delete the surfdrive directory before uploading (useful for "latest" uploads)
+    required: false
+    default: "false"
+  skip_surfdrive:
+    description: Whether to skip uploading to surfdrive as its too slow
+    required: false
+    default: "auto"
+runs:
+  using: "composite"
+  steps:
+            - name: artifacts
+              uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                path: ${{ inputs.folder }}/*.img.xz
+                # name: ${{ inputs.name }}
+                archive: false
+            - name: get release name and rename files
+              id: rename
+              shell: bash
+              run: |
+                dir=${{ github.event.release.tag_name }}
+                rename=true
+                if [ -z "$dir" ]; then
+                  dir="latest"
+                  rename=false
+                fi
+                echo "dir=$dir" >> $GITHUB_OUTPUT
+                if [ "$rename" = true ]; then
+                  # add tag name to the files, just before the .img.xz: asdf.img.xz -> asdf_${dir}.img.xz
+                  for file in $(find ${{ inputs.folder }}/ -name '*.img.xz'); do
+                      f=$(basename $file)
+                      echo $f
+                      mv $file ${{ inputs.folder }}/"${f%.*}_${dir}.${f##*.*}"
+                  done
+
+                fi
+            - name: Push to release # reordered to after renaming, so that the files in the release have the tag name in them
+              continue-on-error: true # sometimes file too big.
+              uses: softprops/action-gh-release@v3
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  files: ${{ inputs.folder }}/*.img.xz
+            - name: check if skip surfdrive should be auto
+              id: check_skip
+              shell: bash
+              run: |
+                if [ "${{ inputs.skip_surfdrive }}" = "auto" ]; then
+                  # if its a release, do not skip, otherwise skip
+                  if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+                    echo "skip_surfdrive=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "skip_surfdrive=true" >> $GITHUB_OUTPUT
+                  fi
+                else
+                  echo "skip_surfdrive=${{ inputs.skip_surfdrive }}" >> $GITHUB_OUTPUT
+                fi
+            - name: Upload to surfdrive with curl
+              if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
+              shell: bash
+              run: |
+                # // create folder with tag name, ignore error if exists
+                dir=${{ steps.rename.outputs.dir }}
+                echo "Uploading to surfdrive folder $dir"
+                # if dir is latest, delete the latest folder if it exists and delete_dir is true
+                if [ "$dir" = "latest" ] && [ "${{ inputs.delete_dir }}" = "true" ]; then
+                  dir="latest"
+                  # delete the latest folder if it exists
+                  curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                fi
+                curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
+                # create a file with the commit hash, url and date of the upload and upload it to surfdrive
+                echo "Commit: ${{ github.sha }}" > upload_info.txt
+                echo "URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> upload_info.txt
+                echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> upload_info.txt
+                curl -T upload_info.txt -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+            - name: upload to release
+              uses: softprops/action-gh-release@v3
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  files: ${{ inputs.folder }}/*.img.xz # these are renamed if a tag is present
