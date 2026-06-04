@@ -1,4 +1,4 @@
-name: Build and Upload
+name: Create overlay image
 
 
 # build a single image, based on sbc and type inputs.
