@@ -49,6 +49,7 @@ runs:
                   for file in $(find ${{ inputs.folder }}/ -name '*.img.xz'); do
                       f=$(basename $file)
                       echo $f
+                      sudo chown $USER:$USER $file
                       mv $file ${{ inputs.folder }}/${f%.img.xz}_${dir}.img.xz
                   done
 
