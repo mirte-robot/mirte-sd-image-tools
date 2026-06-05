@@ -34,6 +34,10 @@ jobs:
           uses: actions/checkout@v6
           with:
              ref: develop
+        - name: Checkout repository release
+          if: >
+                github.event_name == 'release'
+          uses: actions/checkout@v6
         - name: Check repo updates
           if: github.event_name != 'schedule'
               || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
@@ -46,7 +50,12 @@ jobs:
             sudo apt-get update
             sudo apt-get install python3-vcstool -y
             mkdir check
-            vcs import --shallow --input develop_repos.yaml check
+            # if release, use the release repos, otherwise use the develop repos
+            if [ "${{ github.event_name }}" = "release" ]; then
+              vcs import --shallow --input default_repos.yaml check
+            else
+              vcs import --shallow --input develop_repos.yaml check
+            fi
             cd check
             CHANGES=false
             for repo in $(ls); do
