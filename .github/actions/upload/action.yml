@@ -36,6 +36,7 @@ runs:
               id: rename
               shell: bash
               run: |
+                set -xe
                 dir=${{ github.event.release.tag_name }}
                 rename=true
                 if [ -z "$dir" ]; then

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xe
 echo "${type:=""}"
-
+exit 0
 # disable ipv6, as not all package repositories are available over ipv6
 sudo tee /etc/apt/apt.conf.d/99force-ipv4 <<EOF
 Acquire::ForceIPv4 "true";

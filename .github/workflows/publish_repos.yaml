@@ -39,6 +39,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Copy uf2 from release of $OWNER/telemetrix4rpipico of the same release tag
+              continue-on-error: true # if the release does not exist or does not have the uf2, do not fail the workflow
               run: |
                 RELEASE_TAG="${GITHUB_REF#refs/tags/}"
                 echo "Release tag: $RELEASE_TAG"
@@ -53,6 +54,7 @@ jobs:
                 echo "Asset URL ELF: $ASSET_URL_ELF"
                 curl -L -o Telemetrix4RpiPico.elf "$ASSET_URL_ELF"
             - name: Push uf2 and elf to release
+              continue-on-error: true # if the release does not exist, do not fail the workflow
               uses: softprops/action-gh-release@v3
               if: startsWith(github.ref, 'refs/tags/')
               with:
