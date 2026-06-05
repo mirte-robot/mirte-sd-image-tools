@@ -46,10 +46,14 @@ runs:
                 echo "dir=$dir" >> $GITHUB_OUTPUT
                 if [ "$rename" = true ]; then
                   # add tag name to the files, just before the .img.xz: asdf.img.xz -> asdf_${dir}.img.xz
+                  sudo chown -R $USER:$USER ${{ inputs.folder }}
+                  sudo chmod -R 777 ${{ inputs.folder }}
                   for file in $(find ${{ inputs.folder }}/ -name '*.img.xz'); do
                       f=$(basename $file)
                       echo $f
                       sudo chown $USER:$USER $file
+                      sudo chmod 666 $file
+                      
                       mv $file ${{ inputs.folder }}/${f%.img.xz}_${dir}.img.xz
                   done
 
