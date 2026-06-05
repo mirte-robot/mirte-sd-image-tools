@@ -44,7 +44,6 @@ jobs:
           id: check
           continue-on-error: true
           run: |
-            echo ${{ github.event_name }}
             sudo apt update
             curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.deb.sh | sudo bash
             sudo apt-get update
