@@ -82,3 +82,10 @@ jobs:
        with:
          branch: "develop"
        secrets: inherit
+    release-build:
+         needs: check-repo-changes
+         if: github.event_name == 'release'
+         uses: ./.github/workflows/buildFork.yaml
+         with:
+            branch: ${{ github.event.release.tag_name }}
+         secrets: inherit
