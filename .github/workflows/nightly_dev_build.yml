@@ -27,11 +27,17 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
         - name: Checkout repository
-          if: github.event_name != 'schedule'
-              || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
+        
+          if: >
+                github.event_name != 'release' && ( github.event_name != 'schedule'
+                || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot') )
           uses: actions/checkout@v6
           with:
              ref: develop
+        - name: Checkout repository release
+          if: >
+                github.event_name == 'release'
+          uses: actions/checkout@v6
         - name: Check repo updates
           if: github.event_name != 'schedule'
               || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
@@ -43,7 +49,12 @@ jobs:
             sudo apt-get update
             sudo apt-get install python3-vcstool -y
             mkdir check
-            vcs import --shallow --input develop_repos.yaml check
+            # if release, use the release repos, otherwise use the develop repos
+            if [ "${{ github.event_name }}" = "release" ]; then
+              vcs import --shallow --input default_repos.yaml check
+            else
+              vcs import --shallow --input develop_repos.yaml check
+            fi
             cd check
             CHANGES=false
             for repo in $(ls); do
@@ -75,10 +86,18 @@ jobs:
        # have changed in the past 24hrs. This schedule will, by default,
        # only be ran from our own organization.
        needs: check-repo-changes
-       if: >
+       if: > 
+           github.event_name != 'release' && (
            needs.check-repo-changes.outputs.repo_changes == 'true'
-           || github.event_name != 'schedule'
+           || github.event_name != 'schedule' )
        uses: mirte-robot/mirte-sd-image-tools/.github/workflows/buildFork.yaml@develop
        with:
          branch: "develop"
        secrets: inherit
+    release-build:
+         needs: check-repo-changes
+         if: github.event_name == 'release'
+         uses: ./.github/workflows/buildFork.yaml
+         with:
+            branch: ${{ github.event.release.tag_name }}
+         secrets: inherit
