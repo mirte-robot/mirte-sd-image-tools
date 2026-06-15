@@ -26,7 +26,8 @@ jobs:
                     branch=$(echo "$branches" | sed -n "${i}p")
                     i=$((i + 1))
                     echo "Processing $package on branch $branch"
-                    git clone "$package" --branch "$branch"
+                    # only clone the last few things, dont need the other branches or the history
+                    git clone "$package" --branch "$branch" --shallow-submodules --depth 1
                     repo_name=$(basename "$package" .git)
                     zip -r "$repo_name".zip "$repo_name"
                 done
