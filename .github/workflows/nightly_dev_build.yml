@@ -31,13 +31,13 @@ jobs:
           if: >
                 github.event_name != 'release' && ( github.event_name != 'schedule'
                 || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot') )
-          uses: actions/checkout@v6
+          uses: actions/checkout@v7
           with:
              ref: develop
         - name: Checkout repository release
           if: >
                 github.event_name == 'release'
-          uses: actions/checkout@v6
+          uses: actions/checkout@v7
         - name: Check repo updates
           if: github.event_name != 'schedule'
               || (github.event_name == 'schedule' && github.repository_owner == 'mirte-robot')
