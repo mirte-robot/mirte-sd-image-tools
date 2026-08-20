@@ -97,6 +97,14 @@ jobs:
                     cp develop_repos.yaml repos.yaml
                     echo "Using develop_repos.yaml"
                   fi
+                  # if tag, then use tag_repos.yaml, with replaced TAG with the tag name
+                  if [[ "${{ startsWith(github.ref, 'refs/tags/') }}" == "true" ]]; then
+                    cp tag_repos.yaml repos.yaml
+                    echo "Using tag_repos.yaml"
+                    # replace TAG with the tag name
+                    sed -i "s/TAG/${GITHUB_REF_NAME#refs\/tags\/}/g" repos.yaml
+                  fi
+
                   echo -e "MIRTE_TYPE=${{ inputs.mirte_type }}" >> settings.sh
                   ./scripts/download_uf2.sh
                   cat settings.sh
