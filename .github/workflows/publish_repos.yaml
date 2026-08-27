@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
             - name: upload repos
               run: |
                 # for every repo in default_repos.yaml create a zip file and upload it to the release
@@ -26,7 +26,8 @@ jobs:
                     branch=$(echo "$branches" | sed -n "${i}p")
                     i=$((i + 1))
                     echo "Processing $package on branch $branch"
-                    git clone "$package" --branch "$branch"
+                    # only clone the last few things, dont need the other branches or the history
+                    git clone "$package" --branch "$branch" --shallow-submodules --depth 1
                     repo_name=$(basename "$package" .git)
                     zip -r "$repo_name".zip "$repo_name"
                 done
