@@ -58,12 +58,6 @@ if $INSTALL_NETWORK; then /usr/local/src/mirte/mirte-install-scripts/network_ins
 # to use overlayroot: create an sd or usb with an ext4 partition with the label mirte_root. Any changes on the system will be put on the sd/usb instead of the main root file system (emmc)
 echo 'overlayroot=device:dev=LABEL=mirte_root,timeout=2' | sudo tee -a /etc/overlayroot.conf # overlayroot
 
-# install provisioning (not yet on main branch)
-# if $INSTALL_PROVISIONING; then
-#     mkdir /mnt/mirte # create mount point and automount it
-#     echo 'UUID="9EE2-A262" /mnt/mirte/ vfat rw,relatime,uid=1000,gid=1000,errors=remount-ro 0 0' >>/etc/fstab;
-# fi
-
 if $ADD_OVERLAY_PARTITION; then
 	systemctl disable armbian-resize-filesystem # this will be done better by our script
 fi
