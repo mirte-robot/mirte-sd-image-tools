@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export INSTALL_DOCS=false
-export INSTALL_ROS=true # FIXME: Non-functional: can a useable mirte install be made without ROS?
+export INSTALL_ROS2=true # FIXME: Non-functional: can a useable mirte install be made without ROS?
 export INSTALL_ARDUINO=false
 export INSTALL_WEB=true
 # Python should also be active when Web is active, however this is not enforced (otherwise limited functionality)
