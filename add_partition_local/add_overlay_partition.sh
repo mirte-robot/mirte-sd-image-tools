@@ -15,7 +15,11 @@ add__overlay_partition() {
 	echo $loop
 	loopvar=$(echo $loop | grep -oP 'loop[0-9]*' | head -1)
 	echo $loopvar
-	mkfs.ext4 /dev/mapper/${loopvar}p2 -L "mirte_root"
+	# get number for new partition, might be 2 or 3
+	partnum=$(sfdisk -l "$image_file" | grep -oP 'loop[0-9]*p[0-9]*' | grep -oP 'p[0-9]*' | grep -oP '[0-9]*' | tail -1)
+	echo $partnum
+	sleep 5
+	mkfs.ext4 /dev/mapper/${loopvar}p${partnum} -L "mirte_root"
 	sleep 5
 	kpartx -dv /dev/${loopvar}
 }
