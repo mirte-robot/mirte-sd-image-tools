@@ -4,11 +4,11 @@ set -ex
 image_file=$1
 
 add__overlay_partition() {
-	# sfdisk -l -o end -N1 "$image_file"
-	# sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*'
-	# sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort
-	# sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort | tail -1
-	startLocation=$(sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort | tail -1)
+	sfdisk -l -o end -N1 "$image_file"
+	sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*'
+	sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort -n
+	sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort -n | tail -1
+	startLocation=$(sfdisk -l -o end -N1 -q "$image_file" | grep -oP '[0-9]*' | sort -n | tail -1)
 	extraSize="10M"
 	startLocation=$((startLocation + 1))
 	dd if=/dev/zero bs=1M count=10 >>"$image_file" # add data to end of img
