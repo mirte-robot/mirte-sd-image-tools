@@ -11,9 +11,9 @@ add_partition() {
 	startLocation=$(sfdisk -l -o start -N1 "$image_file" | tail -1)
 	# should be 40960 for zero2, 8192 for zero1
 
-	extraSize="1G"
+	extraSize="100M"
 
-	dd if=/dev/zero bs=1M count=1024 >>"$image_file"
+	dd if=/dev/zero bs=1M count=100 >>"$image_file"
 	echo "+$extraSize" | sfdisk --move-data -N 1 "$image_file"
 	echo "$startLocation, $extraSize, b" | sfdisk -a "$image_file"
 	sleep 5
