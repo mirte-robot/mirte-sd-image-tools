@@ -117,8 +117,13 @@ jobs:
             #     yq e -i '.repositories.mirte-telemetrix4arduino.version = "fix-intro-robotics"' repos.yaml
             - name: Build
               run: |
-                    cat repos.yaml
-                    ./packerBuild.sh ${{ inputs.sbc }}
+                    # cat repos.yaml
+                    # ./packerBuild.sh ${{ inputs.sbc }}
+                    mkdir build || true
+                    cd build
+                    wget https://github.com/ArendJan/mirte_base_images/releases/download/25.2.3/Armbian_24.8.1_Rpi4b_jammy_current_6.6.45.img.xz
+                    cd ..
+                    
               env:
                 PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Upload artifacts

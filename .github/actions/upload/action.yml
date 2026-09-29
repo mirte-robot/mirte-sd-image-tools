@@ -99,6 +99,7 @@ runs:
               env:
                 SURFDRIVE_URL: "https://buildmirte.3me.tudelft.nl/upload/"
               run: |
+                set -x
                 # // create folder with tag name, ignore error if exists
                 dir=${{ steps.rename.outputs.dir }}
                 echo "Uploading to surfdrive folder $dir"
@@ -109,7 +110,7 @@ runs:
                   curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
                 fi
                 curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
-                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/"
+                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" 
                 # create a file with the commit hash, url and date of the upload and upload it to surfdrive
                 echo "Commit: ${{ github.sha }}" > upload_info.txt
                 echo "URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> upload_info.txt
