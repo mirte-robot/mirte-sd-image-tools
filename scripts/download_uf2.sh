@@ -38,7 +38,7 @@ if [ ! -f Telemetrix4RpiPico.uf2 ]; then
 fi
 if [ ! -f Telemetrix4RpiPico.uf2 ]; then
 	echo "Failed to download Telemetrix4RpiPico.uf2 from both branch $BRANCH and main branch, using mirte-robot"
-	REPO=mirte-robot/mirte-telemetrix4rpipico
+	REPO=mirte-robot/Telemetrix4RpiPico
 	BRANCH=main
 	download_uf2
 fi
@@ -47,8 +47,8 @@ if [ ! -f Telemetrix4RpiPico.uf2 ]; then
 	gh release download --clobber -D . --pattern "*" --repo $ORIG_REPO || true
 fi
 if [ ! -f Telemetrix4RpiPico.uf2 ]; then
-	echo "trying from mirte-robot/mirte-telemetrix4rpipico release"
-	gh release download --clobber -D . --pattern "*" --repo mirte-robot/mirte-telemetrix4rpipico || true
+	echo "trying from mirte-robot/Telemetrix4RpiPico release"
+	gh release download --clobber -D . --pattern "*" --repo mirte-robot/Telemetrix4RpiPico || true
 fi
 if [ ! -f Telemetrix4RpiPico.uf2 ]; then
 	echo "Failed to download Telemetrix4RpiPico.uf2 from actions and releases, also mirte-robot, please check the repository $ORIG_REPO for the latest build and upload it to the releases if not already there."
