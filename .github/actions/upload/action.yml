@@ -22,6 +22,9 @@ inputs:
     description: Whether to skip uploading to surfdrive as its too slow
     required: false
     default: "auto"
+
+env:
+  SURFDRIVE_URL: "https://buildmirte.3me.tudelft.nl/upload/"
 runs:
   using: "composite"
   steps:
@@ -93,7 +96,7 @@ runs:
                   echo "skip_surfdrive=${{ inputs.skip_surfdrive }}" >> $GITHUB_OUTPUT
                 fi
             - name: Upload to surfdrive with curl
-              if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
+              # if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
               shell: bash
               run: |
                 # // create folder with tag name, ignore error if exists
@@ -103,12 +106,12 @@ runs:
                 if [ "$dir" = "latest" ] && [ "${{ inputs.delete_dir }}" = "true" ]; then
                   dir="latest"
                   # delete the latest folder if it exists
-                  curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                  curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
                 fi
-                curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
-                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/"
+                curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
+                curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/"
                 # create a file with the commit hash, url and date of the upload and upload it to surfdrive
                 echo "Commit: ${{ github.sha }}" > upload_info.txt
                 echo "URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> upload_info.txt
                 echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> upload_info.txt
-                curl -T upload_info.txt -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "https://surfdrive.surf.nl/public.php/webdav/$dir/" || true
+                curl -T upload_info.txt -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
