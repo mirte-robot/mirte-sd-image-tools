@@ -12,7 +12,7 @@ rm /etc/resolv.conf || true
 echo "nameserver 8.8.8.8" >/etc/resolv.conf || true
 # fi
 nslookup ports.ubuntu.com || true
-exit 0
+
 sudo rm /etc/apt/sources.list.d/armbian.list || true
 
 chown root:root /usr/bin/sudo && chmod 4755 /usr/bin/sudo # something with sudo otherwise complaining about "sudo: /usr/bin/sudo must be owned by uid 0 and have the setuid bit set"
