@@ -23,8 +23,6 @@ inputs:
     required: false
     default: "auto"
 
-env:
-  SURFDRIVE_URL: "https://buildmirte.3me.tudelft.nl/upload/"
 runs:
   using: "composite"
   steps:
@@ -98,6 +96,8 @@ runs:
             - name: Upload to surfdrive with curl
               # if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
               shell: bash
+              env:
+                SURFDRIVE_URL: "https://buildmirte.3me.tudelft.nl/upload/"
               run: |
                 # // create folder with tag name, ignore error if exists
                 dir=${{ steps.rename.outputs.dir }}
