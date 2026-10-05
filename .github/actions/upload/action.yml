@@ -97,7 +97,7 @@ runs:
               # if: ${{ steps.check_skip.outputs.skip_surfdrive != 'true' }}
               shell: bash
               env:
-                SURFDRIVE_URL: "https://buildmirte.3me.tudelft.nl/upload/"
+                SURFDRIVE_URL: "https://buildmirte.me.tudelft.nl/upload/"
               run: |
                 set -x
                 # // create folder with tag name, ignore error if exists
