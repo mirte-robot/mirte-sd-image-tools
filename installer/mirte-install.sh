@@ -69,6 +69,11 @@ echo "Removing overlay partition"
 /root/set-text.sh "Removing overlay partition"
 # remove the overlay partition
 parted $EMMC_DEV rm 2
+# remove the settings partition (might be reversed, but doesn't matter)
+parted $EMMC_DEV rm 3
+
+# TODO: only downside is that the settins partition was at the start, so we're missing some space.
+
 # check if the overlay partition is removed
 if [ $? -eq 0 ]; then
 	/root/set-text.sh "Overlay partition removed successfully"
