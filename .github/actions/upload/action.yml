@@ -15,7 +15,7 @@ inputs:
     description: Token for surfdrive
     required: true
   delete_dir:
-    description: Whether to delete the surfdrive directory before uploading (useful for "latest" uploads)
+    description: Whether to delete the surfdrive directory before uploading (useful for "nightly" uploads)
     required: false
     default: "false"
   skip_surfdrive:
@@ -41,7 +41,7 @@ runs:
                 dir=${{ github.event.release.tag_name }}
                 rename=true
                 if [ -z "$dir" ]; then
-                  dir="latest"
+                  dir="nightly"
                   rename=false
                 fi
                 echo "dir=$dir" >> $GITHUB_OUTPUT
@@ -103,10 +103,10 @@ runs:
                 # // create folder with tag name, ignore error if exists
                 dir=${{ steps.rename.outputs.dir }}
                 echo "Uploading to surfdrive folder $dir"
-                # if dir is latest, delete the latest folder if it exists and delete_dir is true
-                if [ "$dir" = "latest" ] && [ "${{ inputs.delete_dir }}" = "true" ]; then
-                  dir="latest"
-                  # delete the latest folder if it exists
+                # if dir is nightly, delete the nightly folder if it exists and delete_dir is true
+                if [ "$dir" = "nightly" ] && [ "${{ inputs.delete_dir }}" = "true" ]; then
+                  dir="nightly"
+                  # delete the nightly folder if it exists
                   curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
                 fi
                 curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
