@@ -110,6 +110,9 @@ runs:
                   curl -X DELETE -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
                 fi
                 curl -X MKCOL -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
+                # download index.php and upload it to $dir/index.php
+                curl -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}index.php" -o "index.php" || true
+                curl -T index.php -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" || true
                 curl -T ${{ inputs.folder }}/*.img.xz -u ${{ inputs.SURFDRIVE_USER }}:${{ inputs.SURFDRIVE_TOKEN }} "${{ env.SURFDRIVE_URL }}$dir/" 
                 # create a file with the commit hash, url and date of the upload and upload it to surfdrive
                 echo "Commit: ${{ github.sha }}" > upload_info.txt
