@@ -41,6 +41,7 @@ if [ ! -f Telemetrix4RpiPico.uf2 ]; then
 	curl -s https://api.github.com/repos/mirte-robot/telemetrix4rpipico/releases/latest | grep -F "browser_download_url" | awk -F\" '{print $4}' | grep "Telemetrix4RpiPico.*.uf2" | wget -i - -O Telemetrix4RpiPico.uf2
 fi
 
-pip install git+https://github.com/arendjan/tmx-pico-aio.git@modules
+wget https://github.com/ArendJan/mirte_screen/releases/latest/download/mirte_screen_arm64
+chmod +x mirte_screen_arm64
 
 sudo apt autoremove && sudo apt clean
